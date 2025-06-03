@@ -74,13 +74,13 @@ cdef class Splitter:
                   np.ndarray X_idx_sorted=*) except -1
 
     cdef int node_reset(self, SIZE_t start, SIZE_t end,
-                        double* weighted_n_node_samples) nogil except -1
+                        double* weighted_n_node_samples) noexcept nogil
 
     cdef int node_split(self,
                         double impurity,   # Impurity of the node
                         SplitRecord* split,
-                        SIZE_t* n_constant_features) nogil except -1
+                        SIZE_t* n_constant_features) noexcept nogil
 
-    cdef void node_value(self, double* dest) nogil
+    cdef void node_value(self, double* dest) noexcept nogil
 
-    cdef double node_impurity(self) nogil
+    cdef double node_impurity(self) noexcept nogil

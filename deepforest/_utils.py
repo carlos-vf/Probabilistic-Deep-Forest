@@ -4,7 +4,6 @@
 import numpy as np
 from datetime import datetime
 
-from . import _cutils as _LIB
 
 
 def merge_proba(probas, n_outputs):
@@ -12,6 +11,8 @@ def merge_proba(probas, n_outputs):
     Merge an array that stores multiple class distributions from all estimators
     in a cascade layer into a final class distribution."""
 
+    from . import _cutils as _LIB
+    
     n_samples, n_features = probas.shape
 
     if n_features % n_outputs != 0:

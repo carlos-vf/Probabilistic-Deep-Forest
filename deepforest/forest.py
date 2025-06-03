@@ -34,8 +34,6 @@ from sklearn.exceptions import DataConversionWarning
 from sklearn.utils.validation import check_is_fitted, _check_sample_weight
 from sklearn.utils.validation import _deprecate_positional_args
 
-from . import _cutils as _LIB
-from . import _forest as _C_FOREST
 
 from .tree import (
     DecisionTreeClassifier,
@@ -43,7 +41,7 @@ from .tree import (
     ExtraTreeClassifier,
     ExtraTreeRegressor,
 )
-from .tree._tree import DOUBLE
+from .tree import DOUBLE
 
 
 MAX_INT = np.iinfo(np.int32).max
@@ -89,6 +87,7 @@ def _get_n_samples_bootstrap(n_samples, max_samples):
 
 
 def _generate_sample_mask(random_state, n_samples, n_samples_bootstrap):
+    from . import _cutils as _LIB
     """Private function used to _parallel_build_trees function."""
 
     random_instance = check_random_state(random_state)
@@ -112,6 +111,8 @@ def _parallel_build_trees(
 ):
     """
     Private function used to fit a single tree in parallel."""
+    from . import _forest as _C_FOREST
+
     n_samples = X.shape[0]
 
     sample_mask = _generate_sample_mask(
@@ -210,6 +211,7 @@ def _partition_estimators(n_estimators, n_jobs):
 
 def _accumulate_prediction(feature, threshold, children, value, X, out, lock):
     """This is a utility function for joblib's Parallel."""
+    from . import _forest as _C_FOREST
     prediction = _C_FOREST.predict(X, feature, threshold, children, value)
     with lock:
         if len(out) == 1:

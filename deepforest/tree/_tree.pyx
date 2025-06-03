@@ -28,6 +28,9 @@ from ._utils cimport safe_realloc
 from ._utils cimport sizet_ptr_to_ndarray
 
 cdef extern from "numpy/arrayobject.h":
+    void PyArray_SetBaseObject(object arr, object base)
+
+cdef extern from "numpy/arrayobject.h":
     object PyArray_NewFromDescr(PyTypeObject* subtype, np.dtype descr,
                                 int nd, np.npy_intp* dims,
                                 np.npy_intp* strides,
@@ -137,8 +140,8 @@ cdef class DepthFirstTreeBuilder(TreeBuilder):
         cdef int init_leaf_capacity
 
         if tree.max_depth <= 10:
-            init_internal_capacity = (2 ** (tree.max_depth + 1)) - 1
-            init_leaf_capacity = (2 ** (tree.max_depth + 1)) - 1
+            init_internal_capacity = <int>((2 ** (tree.max_depth + 1)) - 1)
+            init_leaf_capacity = <int>((2 ** (tree.max_depth + 1)) - 1)
         else:
             init_internal_capacity = 2047
             init_leaf_capacity = 2047
@@ -441,7 +444,7 @@ cdef class Tree:
                        self.internal_node_count * sizeof(Node))
 
     cdef int _resize(self, SIZE_t internal_capacity,
-                     SIZE_t leaf_capacity) nogil except -1:
+                     SIZE_t leaf_capacity) noexcept nogil:
         """Resize `self.nodes` to `internal_capacity`, and resize `self.value`
         to `leaf_capacity`.
 
@@ -461,7 +464,7 @@ cdef class Tree:
                                   leaf_capacity)
 
     cdef int _resize_node_c(self,
-                            SIZE_t internal_capacity=SIZE_MAX) nogil except -1:
+                            SIZE_t internal_capacity=SIZE_MAX) noexcept nogil:
         """Resize `self.nodes` to `internal_capacity`.
 
         Returns -1 in case of failure to allocate memory (and raise
@@ -486,7 +489,7 @@ cdef class Tree:
         return 0
 
     cdef int _resize_value_c(self,
-                             SIZE_t leaf_capacity=SIZE_MAX) nogil except -1:
+                             SIZE_t leaf_capacity=SIZE_MAX) noexcept nogil:
         """Resize `self.value` to `leaf_capacity`.
         
         Returns -1 in case of failure to allocate memory (and raise
@@ -516,7 +519,7 @@ cdef class Tree:
         self.leaf_capacity = leaf_capacity
         return 0
 
-    cdef SIZE_t _upd_parent(self, SIZE_t parent, bint is_left) nogil except -1:
+    cdef SIZE_t _upd_parent(self, SIZE_t parent, bint is_left) noexcept nogil:
         """Add a leaf node to the tree and connect it with its parent. Notice
         that `self.nodes` does not store any information on leaf nodes except
         the id of leaf nodes. In addition, the id of leaf nodes are multiplied
@@ -543,7 +546,7 @@ cdef class Tree:
         return node_id
 
     cdef SIZE_t _add_node(self, SIZE_t parent, bint is_left, bint is_leaf,
-                          SIZE_t feature, DTYPE_t threshold) nogil except -1:
+                          SIZE_t feature, DTYPE_t threshold) noexcept nogil:
         """Add an internal node to the tree.
 
         The new node registers itself as the child of its parent.
@@ -905,7 +908,7 @@ cdef class Tree:
         cdef np.ndarray arr
         arr = np.PyArray_SimpleNewFromData(3, shape, np.NPY_DOUBLE, self.value)
         Py_INCREF(self)
-        arr.base = <PyObject*> self
+        PyArray_SetBaseObject(arr, self)
         return arr
 
     cdef np.ndarray _get_node_ndarray(self):
@@ -926,5 +929,5 @@ cdef class Tree:
                                    strides, <void*> self.nodes,
                                    np.NPY_DEFAULT, None)
         Py_INCREF(self)
-        arr.base = <PyObject*> self
+        PyArray_SetBaseObject(arr, self)
         return arr

@@ -12,8 +12,6 @@ import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils import check_random_state, check_array
 
-from . import _cutils as _LIB
-
 
 X_DTYPE = np.float64
 X_BINNED_DTYPE = np.uint8
@@ -146,6 +144,8 @@ class Binner(TransformerMixin, BaseEstimator):
         return self
 
     def transform(self, X):
+
+        from . import _cutils as _LIB
 
         if not self._is_fitted:
             msg = (

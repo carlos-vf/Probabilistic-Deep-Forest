@@ -34,27 +34,16 @@ from sklearn.utils.validation import _check_sample_weight
 from sklearn.utils.validation import check_is_fitted
 from sklearn.utils.validation import _deprecate_positional_args
 
-from ._criterion import Criterion
-from ._splitter import Splitter
-from ._tree import DepthFirstTreeBuilder
-from ._tree import Tree
-from . import _tree, _splitter, _criterion
 
+from ._tree_constants import (
+    DTYPE,
+    DOUBLE,
+    CRITERIA_CLF,
+    CRITERIA_REG,
+    DENSE_SPLITTERS
+)
 
-# =============================================================================
-# Types and constants
-# =============================================================================
-
-DTYPE = _tree.DTYPE
-DOUBLE = _tree.DOUBLE
-
-CRITERIA_CLF = {"gini": _criterion.Gini, "entropy": _criterion.Entropy}
-CRITERIA_REG = {"mse": _criterion.MSE, "mae": _criterion.MAE}
-
-DENSE_SPLITTERS = {
-    "best": _splitter.BestSplitter,
-    "random": _splitter.RandomSplitter,
-}
+__all__ = ["BaseDecisionTree", "DTYPE", "DOUBLE", "CRITERIA_CLF", "CRITERIA_REG", "DENSE_SPLITTERS"]
 
 # =============================================================================
 # Base decision tree
@@ -140,6 +129,10 @@ class BaseDecisionTree(MultiOutputMixin, BaseEstimator, metaclass=ABCMeta):
     def fit(
         self, X, y, sample_weight=None, check_input=True, X_idx_sorted=None
     ):
+        from ._criterion import Criterion
+        from ._splitter import Splitter
+        from ._tree import DepthFirstTreeBuilder
+        from ._tree import Tree
 
         random_state = check_random_state(self.random_state)
 
